@@ -5,16 +5,40 @@ import requests
 app = FastAPI()
 BASE_URL = "https://aria-audit-api.onrender.com"
 
-# Handshake inicial MCP (ChatGPT hace POST aquí)
+# 🔹 Handshake inicial MCP (ChatGPT hace POST aquí)
 @app.post("/sse")
 async def handshake():
     return JSONResponse({
         "type": "mcp/handshake",
         "version": "2024-01-01",
-        "capabilities": ["tools"]
+        "capabilities": ["tools"],
+        "tools": [
+            {
+                "name": "get_reports",
+                "description": "Listar los reportes históricos de Render",
+                "parameters": {
+                    "type": "object",
+                    "properties": {
+                        "limit": {"type": "integer"}
+                    },
+                    "required": []
+                }
+            },
+            {
+                "name": "get_report",
+                "description": "Obtener un reporte específico por ID",
+                "parameters": {
+                    "type": "object",
+                    "properties": {
+                        "report_id": {"type": "string"}
+                    },
+                    "required": ["report_id"]
+                }
+            }
+        ]
     })
 
-# Debug manual desde navegador (opcional)
+# 🔹 Debug manual en navegador (opcional)
 @app.get("/sse")
 async def handshake_debug():
     return {
@@ -23,13 +47,20 @@ async def handshake_debug():
         "capabilities": ["tools"]
     }
 
-# Herramientas MCP simuladas
+# 🔹 Herramienta 1: Listar reportes
 @app.get("/mcp/get_reports")
 def get_reports(limit: int = 10):
-    r = requests.get(f"{BASE_URL}/reports?limit={limit}")
-    return r.json()
+    try:
+        r = requests.get(f"{BASE_URL}/reports?limit={limit}", timeout=30)
+        return r.json()
+    except Exception as e:
+        return {"error": str(e)}
 
+# 🔹 Herramienta 2: Obtener un reporte por ID
 @app.get("/mcp/get_report/{report_id}")
 def get_report(report_id: str):
-    r = requests.get(f"{BASE_URL}/report/{report_id}")
-    return r.json()
+    try:
+        r = requests.get(f"{BASE_URL}/report/{report_id}", timeout=30)
+        return r.json()
+    except Exception as e:
+        return {"error": str(e)}
