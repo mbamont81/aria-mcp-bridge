@@ -5,7 +5,7 @@ import requests
 app = FastAPI()
 BASE_URL = "https://aria-audit-api.onrender.com"
 
-# 🔹 Handshake inicial MCP (ChatGPT hace POST aquí)
+# 🔹 Handshake inicial MCP (ChatGPT usa este POST)
 @app.post("/sse")
 async def handshake():
     return JSONResponse({
@@ -38,14 +38,14 @@ async def handshake():
         ]
     })
 
-# 🔹 Debug manual (GET /sse) → solo para navegador
+# 🔹 Debug manual (GET para navegador)
 @app.get("/sse")
 async def handshake_debug():
     return {
         "type": "mcp/handshake",
         "version": "2024-01-01",
         "capabilities": ["tools"],
-        "note": "Este es solo debug, el POST /sse es el que usa ChatGPT"
+        "note": "Este es solo debug. El POST /sse es el que usa ChatGPT y devuelve las tools."
     }
 
 # 🔹 Herramienta 1: Listar reportes
