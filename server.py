@@ -19,7 +19,7 @@ async def handshake():
                 "parameters": {
                     "type": "object",
                     "properties": {
-                        "limit": {"type": "integer", "description": "Número máximo de reportes"}
+                        "limit": {"type": "integer", "description": "Número máximo de reportes a devolver"}
                     },
                     "required": []
                 }
@@ -38,13 +38,14 @@ async def handshake():
         ]
     })
 
-# 🔹 Debug manual (GET para verlo en navegador)
+# 🔹 Debug manual en navegador (opcional, GET /sse)
 @app.get("/sse")
 async def handshake_debug():
     return {
         "type": "mcp/handshake",
         "version": "2024-01-01",
-        "capabilities": ["tools"]
+        "capabilities": ["tools"],
+        "note": "Este es solo debug, el POST /sse es el que usa ChatGPT"
     }
 
 # 🔹 Herramienta 1: Listar reportes
@@ -64,4 +65,3 @@ def get_report(report_id: str):
         return r.json()
     except Exception as e:
         return {"error": str(e)}
-
