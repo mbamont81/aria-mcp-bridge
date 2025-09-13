@@ -19,7 +19,7 @@ async def handshake():
                 "parameters": {
                     "type": "object",
                     "properties": {
-                        "limit": {"type": "integer", "description": "Número máximo de reportes a devolver"}
+                        "limit": {"type": "integer", "description": "Número máximo de reportes"}
                     },
                     "required": []
                 }
@@ -38,7 +38,7 @@ async def handshake():
         ]
     })
 
-# 🔹 Debug manual en navegador (opcional)
+# 🔹 Debug manual (GET para verlo en navegador)
 @app.get("/sse")
 async def handshake_debug():
     return {
@@ -64,3 +64,4 @@ def get_report(report_id: str):
         return r.json()
     except Exception as e:
         return {"error": str(e)}
+
