@@ -19,7 +19,10 @@ async def handshake():
                 "parameters": {
                     "type": "object",
                     "properties": {
-                        "limit": {"type": "integer", "description": "Número máximo de reportes a devolver"}
+                        "limit": {
+                            "type": "integer",
+                            "description": "Número máximo de reportes a devolver"
+                        }
                     },
                     "required": []
                 }
@@ -30,12 +33,17 @@ async def handshake():
                 "parameters": {
                     "type": "object",
                     "properties": {
-                        "report_id": {"type": "string", "description": "El ID único del reporte"}
+                        "report_id": {
+                            "type": "string",
+                            "description": "El ID único del reporte"
+                        }
                     },
                     "required": ["report_id"]
                 }
             }
-        ]
+        ],
+        "resources": [],
+        "instructions": "Conector MCP para consultar reportes y auditorías de Aria Audit API en Render"
     })
 
 # 🔹 Debug manual (GET para navegador)
