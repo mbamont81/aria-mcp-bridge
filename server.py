@@ -1,13 +1,11 @@
-from fastapi import FastAPI, Request
+from fastapi import FastAPI
 from fastapi.responses import JSONResponse
-from sse_starlette.sse import EventSourceResponse
-import json
 import requests
 
 app = FastAPI()
 BASE_URL = "https://aria-audit-api.onrender.com"
 
-# Handshake inicial MCP (POST requerido por ChatGPT)
+# Handshake inicial MCP (ChatGPT hace POST aquí)
 @app.post("/sse")
 async def handshake():
     return JSONResponse({
@@ -16,19 +14,14 @@ async def handshake():
         "capabilities": ["tools"]
     })
 
-# Mantener GET también para debug en navegador
+# Debug manual desde navegador (opcional)
 @app.get("/sse")
-async def sse_debug():
-    async def event_generator():
-        yield {
-            "event": "message",
-            "data": json.dumps({
-                "type": "mcp/handshake",
-                "version": "2024-01-01",
-                "capabilities": ["tools"]
-            })
-        }
-    return EventSourceResponse(sse_debug())
+async def handshake_debug():
+    return {
+        "type": "mcp/handshake",
+        "version": "2024-01-01",
+        "capabilities": ["tools"]
+    }
 
 # Herramientas MCP simuladas
 @app.get("/mcp/get_reports")
