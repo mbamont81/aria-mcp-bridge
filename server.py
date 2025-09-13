@@ -1,5 +1,6 @@
 from fastapi import FastAPI, Request
-from fastapi.responses import JSONResponse, EventSourceResponse
+from fastapi.responses import JSONResponse
+from sse_starlette.sse import EventSourceResponse
 import json
 import requests
 
