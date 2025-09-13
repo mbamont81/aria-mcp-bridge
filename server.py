@@ -38,7 +38,7 @@ async def handshake():
         ]
     })
 
-# 🔹 Debug manual en navegador (opcional, GET /sse)
+# 🔹 Debug manual (GET /sse) → solo para probar en navegador
 @app.get("/sse")
 async def handshake_debug():
     return {
