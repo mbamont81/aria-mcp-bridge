@@ -15,11 +15,11 @@ async def handshake():
         "tools": [
             {
                 "name": "get_reports",
-                "description": "Listar los reportes históricos de Render",
+                "description": "Listar los reportes históricos guardados en Render",
                 "parameters": {
                     "type": "object",
                     "properties": {
-                        "limit": {"type": "integer"}
+                        "limit": {"type": "integer", "description": "Número máximo de reportes a devolver"}
                     },
                     "required": []
                 }
@@ -30,7 +30,7 @@ async def handshake():
                 "parameters": {
                     "type": "object",
                     "properties": {
-                        "report_id": {"type": "string"}
+                        "report_id": {"type": "string", "description": "El ID único del reporte"}
                     },
                     "required": ["report_id"]
                 }
