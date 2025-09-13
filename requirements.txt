@@ -1,4 +1,4 @@
-fastapi
-uvicorn
-requests
-sse-starlette
+fastapi==0.110.0
+uvicorn==0.29.0
+requests==2.31.0
+sse-starlette==1.8.2
