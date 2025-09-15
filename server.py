@@ -92,7 +92,7 @@ def get_report(report_id: str):
     except Exception as e:
         return {"error": str(e)}
 
-# 🧠 ===== XGBOOST ENDPOINTS PARA EA (SIN PANDAS/NUMPY) ===== 🧠
+# 🧠 ===== XGBOOST ENDPOINTS PARA EA ===== 🧠
 
 @app.post("/xgboost/predict_sltp")
 async def predict_sltp_xgboost(request_data: dict):
@@ -152,7 +152,7 @@ def prepare_xgboost_features(data):
     Utiliza las mismas variables que se usaron para entrenar el modelo
     """
     
-    # Features básicas (sin usar pandas/numpy)
+    # Features básicas
     features = {
         'symbol': data['symbol'],
         'timeframe': data.get('timeframe', 15),
@@ -178,33 +178,7 @@ def prepare_xgboost_features(data):
         'rsi_oversold': 1 if data['technical'].get('rsi', 50) < 30 else 0,
         'rsi_overbought': 1 if data['technical'].get('rsi', 50) > 70 else 0,
         'high_volatility': 1 if data['technical'].get('volatility', 1) > 2.0 else 0,
-        
-        # Features de velas (si están disponibles)
-        'candle_size': 0,
-        'candle_direction': 0,
-        'recent_momentum': 0
     }
-    
-    # Procesar datos de velas si están disponibles
-    if 'candles' in data and len(data['candles']) > 0:
-        candles = data['candles']
-        latest_candle = candles[0]
-        
-        # Tamaño de la vela actual
-        features['candle_size'] = abs(latest_candle['close'] - latest_candle['open']) / latest_candle['open']
-        
-        # Dirección de la vela
-        features['candle_direction'] = 1 if latest_candle['close'] > latest_candle['open'] else 0
-        
-        # Momentum reciente (comparar últimas 3 velas)
-        if len(candles) >= 3:
-            momentum = 0
-            for i in range(3):
-                if candles[i]['close'] > candles[i]['open']:
-                    momentum += 1
-                else:
-                    momentum -= 1
-            features['recent_momentum'] = momentum
     
     return features
 
@@ -278,7 +252,7 @@ async def get_xgboost_prediction(features, original_data):
         confidence = max(50, min(95, confidence))
         
         # Simular número de trades similares usados
-        trades_used = int(60000 * (confidence / 100))  # Más trades similares = mayor confianza
+        trades_used = int(60000 * (confidence / 100))
         
         return {
             'sl_pips': round(sl_pips, 1),
@@ -303,14 +277,14 @@ def process_xgboost_prediction(prediction, original_data):
         return create_fallback_prediction(original_data)
     
     # Validar confianza mínima
-    if prediction['confidence'] < 50:  # Menos del 50% de confianza
+    if prediction['confidence'] < 50:
         logger.warning(f"Low confidence prediction: {prediction['confidence']}%")
         return create_fallback_prediction(original_data)
     
     # Validar ratio riesgo/recompensa
     if prediction['risk_reward'] < 0.5 or prediction['risk_reward'] > 5.0:
         logger.warning(f"Invalid risk/reward ratio: {prediction['risk_reward']}")
-        prediction['risk_reward'] = 2.0  # Ratio por defecto
+        prediction['risk_reward'] = 2.0
     
     # Crear respuesta final
     response = {
@@ -345,7 +319,7 @@ def create_fallback_prediction(data):
     atr = data.get('technical', {}).get('atr', 0.001)
     entry_price = data.get('entry_price', 1.0)
     
-    # Convertir ATR a pips (sin usar numpy)
+    # Convertir ATR a pips
     atr_pips = (atr / (entry_price * 0.0001))
     
     # SL y TP basados en análisis de datos históricos
@@ -356,7 +330,7 @@ def create_fallback_prediction(data):
         "success": True,
         "sl_pips": sl_pips,
         "tp_pips": tp_pips,
-        "confidence": 60.0,  # Confianza media para fallback
+        "confidence": 60.0,
         "market_regime": "fallback",
         "trade_quality": "medium",
         "trades_used": 0,
@@ -390,12 +364,12 @@ async def get_model_statistics():
                 "total_reports": 890,
                 "total_trades": "60,000+",
                 "date_range": "2025-07-24 to 2025-09-14",
-                "symbols": ["EURUSD", "GBPUSD", "USDJPY", "AUDUSD", "etc"],
-                "timeframes": ["M5", "M15", "M30", "H1", "H4", "D1"]
+                "symbols": ["EURUSD", "GBPUSD", "USDJPY", "AUDUSD", "XAUUSD", "etc"],
+                "timeframes": ["M1", "M5", "M15", "M30", "H1", "H4", "D1"]
             },
             "features": [
                 "price_data", "rsi", "atr", "moving_averages", "spread",
-                "volatility", "time_features", "market_regime", "candle_patterns"
+                "volatility", "time_features", "market_regime"
             ],
             "performance": {
                 "accuracy": "85%+",
@@ -406,7 +380,7 @@ async def get_model_statistics():
         },
         "endpoints": {
             "predict": "/xgboost/predict_sltp",
-            "health": "/xgboost/health",
+            "health": "/xgboost/health", 
             "stats": "/xgboost/model_stats"
         },
         "timestamp": datetime.now().isoformat()
