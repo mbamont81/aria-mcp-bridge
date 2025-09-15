@@ -217,13 +217,27 @@ async def get_xgboost_prediction(features, original_data):
         
         # Calcular SL y TP en pips (corregido para diferentes símbolos)
         # Para EURUSD: 1 pip = 0.0001, para XAUUSD: 1 pip = 0.1
-        pip_size = 0.0001 if "USD" in symbol and symbol != "XAUUSD" else 0.1
-        base_sl_pips = (base_atr / pip_size) * 1.5
+        if symbol == "XAUUSD":
+            pip_size = 0.1
+            base_sl_pips = (base_atr / pip_size) * 1.5
+        else:  # EURUSD, GBPUSD, etc.
+            pip_size = 0.0001
+            # Para forex, usar ATR directamente sin conversión adicional
+            base_sl_pips = (base_atr / 0.00001) * 1.5  # Conversión más conservadora
+        
         base_tp_pips = base_sl_pips * 2.0  # Risk/Reward típico de los datos
         
         # Aplicar factores
         sl_pips = base_sl_pips * rsi_factor * vol_factor * hour_factor
         tp_pips = base_tp_pips * rsi_factor * vol_factor * hour_factor
+        
+        # Aplicar límites de seguridad por símbolo
+        if symbol == "XAUUSD":
+            sl_pips = max(50, min(1000, sl_pips))  # 50-1000 pips para oro
+            tp_pips = max(100, min(2000, tp_pips))
+        else:  # EURUSD, GBPUSD, etc.
+            sl_pips = max(3, min(50, sl_pips))     # 3-50 pips para forex
+            tp_pips = max(6, min(100, tp_pips))
         
         # Determinar régimen de mercado
         if volatility > 2.0:
