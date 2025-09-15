@@ -222,8 +222,9 @@ async def get_xgboost_prediction(features, original_data):
             base_sl_pips = (base_atr / pip_size) * 1.5
         else:  # EURUSD, GBPUSD, etc.
             pip_size = 0.0001
-            # Para forex, usar ATR directamente sin conversión adicional
-            base_sl_pips = (base_atr / 0.00001) * 1.5  # Conversión más conservadora
+            # Para forex, calcular basado en ATR normalizado
+            atr_normalized = base_atr / features['entry_price']  # ATR como % del precio
+            base_sl_pips = (atr_normalized * 100000) * 1.5  # Convertir a pips y aplicar factor
         
         base_tp_pips = base_sl_pips * 2.0  # Risk/Reward típico de los datos
         
@@ -231,13 +232,13 @@ async def get_xgboost_prediction(features, original_data):
         sl_pips = base_sl_pips * rsi_factor * vol_factor * hour_factor
         tp_pips = base_tp_pips * rsi_factor * vol_factor * hour_factor
         
-        # Aplicar límites de seguridad por símbolo
+        # Aplicar límites de seguridad más flexibles
         if symbol == "XAUUSD":
-            sl_pips = max(50, min(1000, sl_pips))  # 50-1000 pips para oro
-            tp_pips = max(100, min(2000, tp_pips))
+            sl_pips = max(20, min(800, sl_pips))   # 20-800 pips para oro (más rango)
+            tp_pips = max(40, min(1600, tp_pips))
         else:  # EURUSD, GBPUSD, etc.
-            sl_pips = max(3, min(50, sl_pips))     # 3-50 pips para forex
-            tp_pips = max(6, min(100, tp_pips))
+            sl_pips = max(2, min(150, sl_pips))    # 2-150 pips para forex (más rango)
+            tp_pips = max(4, min(300, tp_pips))
         
         # Determinar régimen de mercado
         if volatility > 2.0:
