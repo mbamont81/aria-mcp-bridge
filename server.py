@@ -215,8 +215,10 @@ async def get_xgboost_prediction(features, original_data):
         elif hour >= 22 or hour <= 6:  # Horario de menor actividad
             hour_factor = 0.9
         
-        # Calcular SL y TP en pips (basado en análisis de 60K+ trades)
-        base_sl_pips = (base_atr / (features['entry_price'] * 0.0001)) * 1.5
+        # Calcular SL y TP en pips (corregido para diferentes símbolos)
+        # Para EURUSD: 1 pip = 0.0001, para XAUUSD: 1 pip = 0.1
+        pip_size = 0.0001 if "USD" in symbol and symbol != "XAUUSD" else 0.1
+        base_sl_pips = (base_atr / pip_size) * 1.5
         base_tp_pips = base_sl_pips * 2.0  # Risk/Reward típico de los datos
         
         # Aplicar factores
@@ -319,8 +321,10 @@ def create_fallback_prediction(data):
     atr = data.get('technical', {}).get('atr', 0.001)
     entry_price = data.get('entry_price', 1.0)
     
-    # Convertir ATR a pips
-    atr_pips = (atr / (entry_price * 0.0001))
+    # Convertir ATR a pips (corregido para diferentes símbolos)
+    symbol = data.get('symbol', 'EURUSD')
+    pip_size = 0.0001 if "USD" in symbol and symbol != "XAUUSD" else 0.1
+    atr_pips = (atr / pip_size)
     
     # SL y TP basados en análisis de datos históricos
     sl_pips = round(atr_pips * 1.5, 1)  # 1.5x ATR para SL
